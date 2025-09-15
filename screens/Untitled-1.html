@@ -1,0 +1,192 @@
+<!-- Main Content -->
+<main class="main-content">
+  <div class="dashboard">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value">₹47,392</div>
+        <div class="stat-label">Monthly Revenue</div>
+        <div class="stat-change">+12.5% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">1,284</div>
+        <div class="stat-label">Active Customers</div>
+        <div class="stat-change">+8.2% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">92</div>
+        <div class="stat-label">Pending Invoices</div>
+        <div class="stat-change">-5.1% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">98.2%</div>
+        <div class="stat-label">Collection Rate</div>
+        <div class="stat-change">+0.8% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">₹15,200</div>
+        <div class="stat-label">Outstanding Payments</div>
+        <div class="stat-change">-3.4% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">₹5,430</div>
+        <div class="stat-label">Expenses This Month</div>
+        <div class="stat-change">+6.7% from last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">126</div>
+        <div class="stat-label">Products in Stock</div>
+        <div class="stat-change">-2.1% from last month</div>
+      </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Revenue Analytics</div>
+          <div class="chart-subtitle">
+            Monthly revenue trends and forecasts
+          </div>
+        </div>
+        <div class="chart-placeholder">
+          Revenue Chart Placeholder<br />
+          <small>Interactive revenue chart would be displayed here</small>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Recent Activity</div>
+          <div class="chart-subtitle">Latest billing activities</div>
+        </div>
+        <div style="flex: 1; overflow-y: auto">
+          <div class="activity-item">
+            <div class="activity-title">Invoice #INV-2025-0142 paid</div>
+            <div class="activity-time">2 minutes ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">New customer registered</div>
+            <div class="activity-time">15 minutes ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">Stock adjusted for Product #P-1002</div>
+            <div class="activity-time">25 minutes ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">Expense logged: Office Supplies</div>
+            <div class="activity-time">40 minutes ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">Payment reminder sent</div>
+            <div class="activity-time">1 hour ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">Purchase Bill #PB-2025-009 created</div>
+            <div class="activity-time">2 hours ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-title">Sales Return processed</div>
+            <div class="activity-time">3 hours ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <!-- Primary Navigation Section -->
+  <div class="sidebar-section section-primary">
+    <div class="section-title">Billing Operations</div>
+    <div class="section-subtitle">Core billing and invoice management</div>
+
+    <a class="nav-btn active" href="screens/dashboard.html">
+      Dashboard
+      <span class="btn-icon">→</span>
+    </a>
+    <button class="nav-btn" onclick="navigateTo('invoices')">
+      Invoices
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('purchase-bills')">
+      Purchase Bills
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('customers')">
+      Customers
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('suppliers')">
+      Suppliers
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('products')">
+      Products
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('payments')">
+      Payments
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('expenses')">
+      Expenses
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('returns')">
+      Returns
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('reports')">
+      Reports
+      <span class="btn-icon">→</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('analytics')">
+      Analytics
+      <span class="btn-icon">→</span>
+    </button>
+  </div>
+
+  <!-- Secondary Navigation Section -->
+  <div class="sidebar-section section-secondary">
+    <div class="section-title">System & Tools</div>
+    <div class="section-subtitle">Configuration and utilities</div>
+
+    <button class="nav-btn" onclick="navigateTo('stock-adjustments')">
+      Stock Adjustments
+      <span class="btn-icon">📦</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('taxes')">
+      Tax Setup
+      <span class="btn-icon">💰</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('users')">
+      Users & Roles
+      <span class="btn-icon">👥</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('audit-logs')">
+      Audit Logs
+      <span class="btn-icon">📝</span>
+    </button>
+    <button class="nav-btn" onclick="openModal('settingsModal')">
+      Settings
+      <span class="btn-icon">⚙</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('integrations')">
+      Integrations
+      <span class="btn-icon">🔗</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('api')">
+      API Access
+      <span class="btn-icon">🔧</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('support')">
+      Support
+      <span class="btn-icon">💬</span>
+    </button>
+    <button class="nav-btn" onclick="navigateTo('documentation')">
+      Docs
+      <span class="btn-icon">📚</span>
+    </button>
+  </div>
+</aside>
