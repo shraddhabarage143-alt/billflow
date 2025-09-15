@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BillFlow - Modern Billing Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-green: #00f5a0;
+        --primary-dark: #00d084;
+        --secondary-green: #f0fdf4;
+        --dark-bg: #0a0b0d;
+        --card-bg: #1a1d23;
+        --card-hover: #252932;
+        --text-primary: #ffffff;
+        --text-secondary: #a0a3a8;
+        --text-muted: #6b7280;
+        --border-color: #2d3139;
+        --accent-blue: #3b82f6;
+        --accent-purple: #8b5cf6;
+        --accent-orange: #f97316;
+        --accent-pink: #ec4899;
+        --gradient-1: linear-gradient(135deg, #00f5a0 0%, #00d5ff 100%);
+        --gradient-2: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-3: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-4: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --shadow-glow: 0 20px 40px rgba(0, 245, 160, 0.15);
+        --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: var(--dark-bg);
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Animated Background */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 80%, rgba(0, 245, 160, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+        animation: backgroundShift 20s ease-in-out infinite;
+        z-index: -1;
+      }
+
+      @keyframes backgroundShift {
+        0%, 100% { transform: rotate(0deg) scale(1); }
+        33% { transform: rotate(1deg) scale(1.02); }
+        66% { transform: rotate(-1deg) scale(0.98); }
+      }
+
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        grid-template-rows: 80px 1fr;
+        height: 100vh;
+        gap: 0;
+      }
+
+      /* Header */
+      .header {
+        grid-column: 1 / -1;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--glass-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 32px;
+        z-index: 100;
+        position: relative;
+      }
+
+      .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 245, 160, 0.1), transparent);
+        animation: headerShimmer 3s ease-in-out infinite;
+      }
+
+      @keyframes headerShimmer {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 1; }
+      }
+
+      .logo-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        z-index: 1;
+      }
+
+      .logo {
+        width: 48px;
+        height: 48px;
+        background: var(--gradient-1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--dark-bg);
+        font-weight: 800;
+        font-size: 20px;
+        box-shadow: var(--shadow-glow);
+        animation: logoGlow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes logoGlow {
+        0% { box-shadow: var(--shadow-glow); }
+        100% { box-shadow: 0 20px 40px rgba(0, 245, 160, 0.3); }
+      }
+
+      .brand-name {
+        font-size: 28px;
+        font-weight: 800;
+        background: var(--gradient-1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        z-index: 1;
+      }
+
+      .header-btn {
+        padding: 12px 24px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .header-btn.primary {
+        background: var(--gradient-1);
+        color: var(--dark-bg);
+        box-shadow: var(--shadow-glow);
+        text-decoration: none;
+      }
+
+      .header-btn.primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      .header-btn.primary:hover::before {
+        left: 100%;
+      }
+
+      .header-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 25px 50px rgba(0, 245, 160, 0.3);
+      }
+
+      .header-btn.secondary {
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        color: var(--text-primary);
+        border: 1px solid var(--glass-border);
+      }
+
+      .header-btn.secondary:hover {
+        background: var(--card-hover);
+        transform: translateY(-2px);
+      }
+
+      /* Main Content */
+      .main-content {
+        padding: 32px;
+        background: transparent;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .main-content::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .main-content::-webkit-scrollbar-track {
+        background: var(--dark-bg);
+      }
+
+      .main-content::-webkit-scrollbar-thumb {
+        background: var(--primary-green);
+        border-radius: 3px;
+      }
+
+      /* Dashboard */
+      .dashboard {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 16px;
+      }
+
+      .stat-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(0, 245, 160, 0.05), rgba(59, 130, 246, 0.05));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .stat-card:hover::before {
+        opacity: 1;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: var(--shadow-card);
+        border-color: var(--primary-green);
+      }
+
+      .stat-card:nth-child(1) { border-top: 3px solid var(--primary-green); }
+      .stat-card:nth-child(2) { border-top: 3px solid var(--accent-blue); }
+      .stat-card:nth-child(3) { border-top: 3px solid var(--accent-orange); }
+      .stat-card:nth-child(4) { border-top: 3px solid var(--accent-purple); }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        position: relative;
+        z-index: 1;
+      }
+
+      .stat-icon.revenue { background: var(--gradient-1); }
+      .stat-icon.customers { background: var(--gradient-4); }
+      .stat-icon.invoices { background: var(--gradient-3); }
+      .stat-icon.rate { background: var(--gradient-2); }
+
+      .stat-value {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .stat-label {
+        font-size: 16px;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+        font-weight: 500;
+      }
+
+      .stat-change {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+      }
+
+      .stat-change.positive {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+      }
+
+      .stat-change.negative {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+      }
+
+      /* Charts Section */
+      .charts-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        min-height: 500px;
+      }
+
+      .chart-container {
+        display: grid;
+        grid-template-rows: 1fr 300px;
+        gap: 24px;
+      }
+
+      .chart-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .chart-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card);
+      }
+
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .chart-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .chart-subtitle {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      .chart-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .chart-btn {
+        padding: 8px 16px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .chart-btn.active, .chart-btn:hover {
+        background: var(--primary-green);
+        color: var(--dark-bg);
+        border-color: var(--primary-green);
+      }
+
+      .chart-content {
+        flex: 1;
+        position: relative;
+        min-height: 300px;
+      }
+
+      /* Activity Section */
+      .activity-section {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .activity-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .activity-list {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .activity-item:hover {
+        background: var(--glass-bg);
+        margin: 0 -16px;
+        padding: 20px 16px;
+        border-radius: 12px;
+      }
+
+      .activity-item:last-child {
+        border-bottom: none;
+      }
+
+      .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .activity-icon.payment { background: var(--gradient-1); }
+      .activity-icon.customer { background: var(--gradient-4); }
+      .activity-icon.stock { background: var(--gradient-2); }
+      .activity-icon.expense { background: var(--gradient-3); }
+
+      .activity-content {
+        flex: 1;
+      }
+
+      .activity-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+      }
+
+      .activity-time {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      .activity-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary-green);
+      }
+
+      /* Metrics Row */
+      .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        margin-bottom: 24px;
+      }
+
+      .metric-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 24px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card);
+      }
+
+      .metric-value {
+        font-size: 28px;
+        font-weight: 800;
+        margin-bottom: 8px;
+      }
+
+      .metric-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      /* Sidebar */
+      .sidebar {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border-left: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .sidebar::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(0, 245, 160, 0.02) 0%, transparent 50%, rgba(59, 130, 246, 0.02) 100%);
+        pointer-events: none;
+      }
+
+      .sidebar-section {
+        padding: 32px 24px;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        z-index: 1;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+      }
+
+      .section-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
+
+      .nav-btn {
+        width: 100%;
+        padding: 16px 20px;
+        margin-bottom: 8px;
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 15px;
+        font-weight: 500;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 16px;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .nav-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 245, 160, 0.1), transparent);
+        transition: left 0.5s ease;
+      }
+
+      .nav-btn:hover::before {
+        left: 100%;
+      }
+
+      .nav-btn:hover {
+        background: var(--glass-bg);
+        border-color: var(--glass-border);
+        color: var(--primary-green);
+        transform: translateX(8px);
+      }
+
+      .nav-btn.active {
+        background: linear-gradient(135deg, var(--primary-green), var(--primary-dark));
+        color: var(--dark-bg);
+        border-color: var(--primary-green);
+        box-shadow: 0 8px 25px rgba(0, 245, 160, 0.3);
+      }
+
+      .btn-icon {
+        font-size: 16px;
+        transition: transform 0.3s ease;
+      }
+
+      .nav-btn:hover .btn-icon {
+        transform: translateX(4px);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 1200px) {
+        .container {
+          grid-template-columns: 1fr 280px;
+        }
+        
+        .stats-grid {
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+          grid-template-rows: 80px 1fr;
+        }
+        
+        .sidebar {
+          display: none;
+        }
+        
+        .charts-section {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Loading Animation */
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+
+      .loading {
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo-section">
+          <div class="logo">BF</div>
+          <div class="brand-name">BillFlow</div>
+        </div>
+        <div class="header-buttons">
+          <button class="header-btn secondary" onclick="openModal('settingsModal')">
+            Settings
+          </button>
+          <button class="header-btn secondary" onclick="openModal('profileModal')">
+            Profile
+          </button>
+          <a class="header-btn primary" href="screens/create-bill-screen.html">
+            ✨ New Invoice
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="dashboard">
+          <!-- Enhanced Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card" onclick="animateCard(this)">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" data-value="47392">₹0</div>
+                  <div class="stat-label">Monthly Revenue</div>
+                  <div class="stat-change positive">↗ +12.5% from last month</div>
+                </div>
+                <div class="stat-icon revenue">💰</div>
+              </div>
+            </div>
+            
+            <div class="stat-card" onclick="animateCard(this)">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" data-value="1284">0</div>
+                  <div class="stat-label">Active Customers</div>
+                  <div class="stat-change positive">↗ +8.2% from last month</div>
+                </div>
+                <div class="stat-icon customers">👥</div>
+              </div>
+            </div>
+            
+            <div class="stat-card" onclick="animateCard(this)">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" data-value="92">0</div>
+                  <div class="stat-label">Pending Invoices</div>
+                  <div class="stat-change negative">↘ -5.1% from last month</div>
+                </div>
+                <div class="stat-icon invoices">📋</div>
+              </div>
+            </div>
+            
+            <div class="stat-card" onclick="animateCard(this)">
+              <div class="stat-header">
+                <div>
+                  <div class="stat-value" data-value="98.2">0%</div>
+                  <div class="stat-label">Collection Rate</div>
+                  <div class="stat-change positive">↗ +0.8% from last month</div>
+                </div>
+                <div class="stat-icon rate">⚡</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Metrics -->
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-value" style="color: var(--accent-orange);" data-value="15200">₹0</div>
+              <div class="metric-label">Outstanding Payments</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" style="color: var(--accent-purple);" data-value="5430">₹0</div>
+              <div class="metric-label">Monthly Expenses</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" style="color: var(--accent-blue);" data-value="126">0</div>
+              <div class="metric-label">Products in Stock</div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="charts-section">
+            <div class="chart-container">
+              <!-- Revenue Chart -->
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div>
+                    <div class="chart-title">Revenue Analytics</div>
+                    <div class="chart-subtitle">Real-time revenue trends and forecasts</div>
+                  </div>
+                  <div class="chart-controls">
+                    <button class="chart-btn active" onclick="switchChart('7d')">7D</button>
+                    <button class="chart-btn" onclick="switchChart('30d')">30D</button>
+                    <button class="chart-btn" onclick="switchChart('90d')">90D</button>
+                    <button class="chart-btn" onclick="switchChart('1y')">1Y</button>
+                  </div>
+                </div>
+                <div class="chart-content">
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+
+              <!-- Performance Chart -->
+              <div class="chart-card">
+                <div class="chart-header">
+                  <div>
+                    <div class="chart-title">Performance Metrics</div>
+                    <div class="chart-subtitle">Key performance indicators</div>
+                  </div>
+                </div>
+                <div class="chart-content">
+                  <canvas id="performanceChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activity Section -->
+            <div class="activity-section">
+              <div class="activity-header">
+                <div>
+                  <div class="chart-title">Live Activity</div>
+                  <div class="chart-subtitle">Real-time business updates</div>
+                </div>
+              </div>
+              <div class="activity-list" id="activityList">
+                <div class="activity-item">
+                  <div class="activity-icon payment">💳</div>
+                  <div class="activity-content">
+                    <div class="activity-title">Payment Received</div>
+                    <div class="activity-time">2 minutes ago</div>
+                  </div>
+                  <div class="activity-amount">+₹8,500</div>
+                </div>
+                
+                <div class="activity-item">
+                  <div class="activity-icon customer">👤</div>
+                  <div class="activity-content">
+                    <div class="activity-title">New Customer</div>
+                    <div class="activity-time">15 minutes ago</div>
+                  </div>
+                </div>
+                
+                <div class="activity-item">
+                  <div class="activity-icon stock">📦</div>
+                  <div class="activity-content">
+                    <div class="activity-title">Stock Updated</div>
+                    <div class="activity-time">25 minutes ago</div>
+                  </div>
+                </div>
+                
+                <div class="activity-item">
+                  <div class="activity-icon expense">🧾</div>
+                  <div class="activity-content">
+                    <div class="activity-title">Expense Logged</div>
+                    <div class="activity-time">40 minutes ago</div>
+                  </div>
+                  <div class="activity-amount">-₹1,200</div>
+                </div>
+                
+                <div class="activity-item">
+                  <div class="activity-icon payment">📧</div>
+                  <div class="activity-content">
+                    <div class="activity-title">Reminder Sent</div>
+                    <div class="activity-time">1 hour ago</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="section-title">🎯 Core Operations</div>
+          <div class="section-subtitle">Essential billing & invoice tools</div>
+
+          <a class="nav-btn active" href="">
+            Dashboard
+            <span class="btn-icon">→</span>
+          </a>
+          <a class="nav-btn" href="">
+            Invoices
+            <span class="btn-icon">📄</span>
+          </a>
+          <a class="nav-btn" href="">
+            Purchase Bills
+            <span class="btn-icon">🧾</span>
+          </a>
+          <a class="nav-btn" href="">
+            Customers
+            <span class="btn-icon">👥</span>
+          </a>
+          <a class="nav-btn" href="">
+            Suppliers
+            <span class="btn-icon">🏢</span>
+          </a>
+          <a class="nav-btn" href="">
+            Products
+            <span class="btn-icon">📦</span>
+          </a>
+          <a class="nav-btn" href="">
+            Payments
+            <span class="btn-icon">💳</span>
+          </a>
+          <a class="nav-btn" href="">
+            Analytics
+            <span class="btn-icon">📊</span>
+          </a>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="section-title">⚙️ System Tools</div>
+          <div class="section-subtitle">Configuration & utilities</div>
+
+          <a class="nav-btn" href="">
+            Reports
+            <span class="btn-icon">📋</span>
+          </a>
+          <a class="nav-btn" href="">
+            Expenses
+            <span class="btn-icon">💰</span>
+          </a>
+          <a class="nav-btn" href="">
+            Tax Setup
+            <span class="btn-icon">🧮</span>
+          </a>
+          <a class="nav-btn" href="">
+            Users & Roles
+            <span class="btn-icon">🔐</span>
+          </a>
+          <a class="nav-btn" href="">
+            Settings
+            <span class="btn-icon">⚙️</span>
+          </a>
+          <a class="nav-btn" href="">
+            Integrations
+            <span class="btn-icon">🔗</span>
+          </a>
+          <a class="nav-btn" href="">
+            Support
+            <span class="btn-icon">💬</span>
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      // Initialize Charts
+      let revenueChart, performanceChart;
+
+      // Revenue Chart Data
+      const revenueData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        datasets: [{
+          label: 'Revenue',
+          data: [30000, 35000, 32000, 42000, 38000, 45000, 48000, 52000, 47392],
+          borderColor: '#00f5a0',
+          backgroundColor: 'rgba(0, 245, 160, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointBackgroundColor: '#00f5a0',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+        }, {
+          label: 'Target',
+          data: [25000, 30000, 35000, 40000, 42000, 44000, 46000, 48000, 50000],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.05)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          borderDash: [5, 5],
+          pointBackgroundColor: '#3b82f6',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+        }]
+      };
+
+      // Performance Chart Data
+      const performanceData = {
+        labels: ['Collection Rate', 'Customer Satisfaction', 'Invoice Accuracy', 'Response Time', 'Efficiency'],
+        datasets: [{
+          label: 'Current',
+          data: [98, 94, 96, 88, 92],
+          backgroundColor: [
+            'rgba(0, 245, 160, 0.8)',
+            'rgba(59, 130, 246, 0.8)', 
+            'rgba(139, 92, 246, 0.8)',
+            'rgba(249, 115, 22, 0.8)',
+            'rgba(236, 72, 153, 0.8)'
+          ],
+          borderColor: [
+            '#00f5a0',
+            '#3b82f6',
+            '#8b5cf6', 
+            '#f97316',
+            '#ec4899'
+          ],
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      };
+
+      // Initialize Revenue Chart
+      function initRevenueChart() {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        revenueChart = new Chart(ctx, {
+          type: 'line',
+          data: revenueData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                  color: '#ffffff',
+                  usePointStyle: true,
+                  padding: 20,
+                  font: {
+                    size: 12,
+                    weight: '500'
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  color: '#a0a3a8',
+                  font: {
+                    size: 11
+                  }
+                }
+              },
+              y: {
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)',
+                  drawBorder: false
+                },
+                ticks: {
+                  color: '#a0a3a8',
+                  font: {
+                    size: 11
+                  },
+                  callback: function(value) {
+                    return '₹' + (value / 1000).toFixed(0) + 'K';
+                  }
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            },
+            elements: {
+              point: {
+                hoverBackgroundColor: '#ffffff'
+              }
+            }
+          }
+        });
+      }
+
+      // Initialize Performance Chart
+      function initPerformanceChart() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        performanceChart = new Chart(ctx, {
+          type: 'radar',
+          data: performanceData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                display: false
+              }
+            },
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 100,
+                grid: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                angleLines: {
+                  color: 'rgba(255, 255, 255, 0.1)'
+                },
+                pointLabels: {
+                  color: '#ffffff',
+                  font: {
+                    size: 11,
+                    weight: '500'
+                  }
+                },
+                ticks: {
+                  color: '#6b7280',
+                  backdropColor: 'transparent',
+                  font: {
+                    size: 10
+                  }
+                }
+              }
+            },
+            elements: {
+              line: {
+                borderWidth: 2
+              },
+              point: {
+                borderWidth: 2,
+                radius: 4,
+                hoverRadius: 6
+              }
+            }
+          }
+        });
+      }
+
+      // Animate Numbers
+      function animateNumber(element, target, duration = 2000, prefix = '', suffix = '') {
+        const start = 0;
+        const startTime = performance.now();
+        
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing function for smooth animation
+          const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+          const current = start + (target - start) * easeOutQuart;
+          
+          if (target < 100) {
+            element.textContent = prefix + current.toFixed(1) + suffix;
+          } else {
+            element.textContent = prefix + Math.floor(current).toLocaleString() + suffix;
+          }
+          
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          } else {
+            if (target < 100) {
+              element.textContent = prefix + target.toFixed(1) + suffix;
+            } else {
+              element.textContent = prefix + target.toLocaleString() + suffix;
+            }
+          }
+        }
+        
+        requestAnimationFrame(update);
+      }
+
+      // Animate all stat values
+      function animateStats() {
+        const statValues = document.querySelectorAll('.stat-value[data-value]');
+        const metricValues = document.querySelectorAll('.metric-value[data-value]');
+        
+        statValues.forEach((element, index) => {
+          setTimeout(() => {
+            const value = parseFloat(element.dataset.value);
+            const isPercentage = element.textContent.includes('%');
+            const isCurrency = element.textContent.includes('₹');
+            
+            const prefix = isCurrency ? '₹' : '';
+            const suffix = isPercentage ? '%' : '';
+            
+            animateNumber(element, value, 2000 + (index * 200), prefix, suffix);
+          }, index * 100);
+        });
+
+        metricValues.forEach((element, index) => {
+          setTimeout(() => {
+            const value = parseFloat(element.dataset.value);
+            const isCurrency = element.textContent.includes('₹');
+            const prefix = isCurrency ? '₹' : '';
+            
+            animateNumber(element, value, 1500 + (index * 150), prefix, '');
+          }, 500 + (index * 100));
+        });
+      }
+
+      // Card Animation
+      function animateCard(card) {
+        card.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          card.style.transform = 'translateY(-8px) scale(1.02)';
+        }, 100);
+      }
+
+      // Chart Controls
+      function switchChart(period) {
+        document.querySelectorAll('.chart-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Update chart data based on period
+        let newData = [...revenueData.datasets[0].data];
+        
+        switch(period) {
+          case '7d':
+            newData = [42000, 43500, 41000, 45000, 44500, 46000, 47392];
+            revenueChart.data.labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            break;
+          case '30d':
+            newData = [38000, 42000, 39000, 45000, 43000, 46000, 44000, 48000, 47392];
+            revenueChart.data.labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
+            break;
+          case '90d':
+            newData = [35000, 38000, 42000, 45000, 43000, 46000, 48000, 50000, 47392];
+            revenueChart.data.labels = ['Jul', 'Aug', 'Sep'];
+            break;
+          case '1y':
+            newData = [25000, 28000, 32000, 35000, 38000, 42000, 45000, 48000, 50000, 52000, 49000, 47392];
+            revenueChart.data.labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            break;
+        }
+        
+        revenueChart.data.datasets[0].data = newData;
+        revenueChart.update('active');
+      }
+
+      // Live Activity Updates
+      function addLiveActivity() {
+        const activities = [
+          { icon: 'payment', title: 'Payment Received', time: 'just now', amount: '+₹' + (Math.floor(Math.random() * 10000) + 1000) },
+          { icon: 'customer', title: 'New Customer Registered', time: 'just now' },
+          { icon: 'stock', title: 'Stock Level Alert', time: 'just now' },
+          { icon: 'expense', title: 'Expense Approved', time: 'just now', amount: '-₹' + (Math.floor(Math.random() * 5000) + 500) }
+        ];
+        
+        const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+        const activityList = document.getElementById('activityList');
+        
+        const newActivity = document.createElement('div');
+        newActivity.className = 'activity-item';
+        newActivity.style.opacity = '0';
+        newActivity.style.transform = 'translateY(-20px)';
+        
+        newActivity.innerHTML = `
+          <div class="activity-icon ${randomActivity.icon}">
+            ${randomActivity.icon === 'payment' ? '💳' : randomActivity.icon === 'customer' ? '👤' : randomActivity.icon === 'stock' ? '📦' : '🧾'}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${randomActivity.title}</div>
+            <div class="activity-time">${randomActivity.time}</div>
+          </div>
+          ${randomActivity.amount ? `<div class="activity-amount">${randomActivity.amount}</div>` : ''}
+        `;
+        
+        activityList.insertBefore(newActivity, activityList.firstChild);
+        
+        // Animate in
+        requestAnimationFrame(() => {
+          newActivity.style.transition = 'all 0.5s ease';
+          newActivity.style.opacity = '1';
+          newActivity.style.transform = 'translateY(0)';
+        });
+        
+        // Remove oldest if more than 8 items
+        const items = activityList.querySelectorAll('.activity-item');
+        if (items.length > 8) {
+          const lastItem = items[items.length - 1];
+          lastItem.style.transition = 'all 0.3s ease';
+          lastItem.style.opacity = '0';
+          lastItem.style.transform = 'translateX(-50px)';
+          setTimeout(() => {
+            if (lastItem.parentNode) {
+              lastItem.remove();
+            }
+          }, 300);
+        }
+      }
+
+      // Modal Functions (keeping original functionality)
+      function openModal(modalId) {
+        // Modal functionality would go here
+        console.log('Opening modal:', modalId);
+      }
+
+      function closeModal(modalId) {
+        // Modal functionality would go here
+        console.log('Closing modal:', modalId);
+      }
+
+      // Initialize Everything
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Modern BillFlow Dashboard Loaded');
+        
+        // Initialize charts after a short delay for better visual effect
+        setTimeout(() => {
+          initRevenueChart();
+          initPerformanceChart();
+        }, 500);
+        
+        // Start number animations
+        setTimeout(() => {
+          animateStats();
+        }, 1000);
+        
+        // Add live activity updates every 15 seconds
+        setInterval(addLiveActivity, 15000);
+        
+        // Add some initial variety to activity times
+        setTimeout(() => {
+          const timeElements = document.querySelectorAll('.activity-time');
+          const times = ['2 minutes ago', '15 minutes ago', '25 minutes ago', '40 minutes ago', '1 hour ago'];
+          timeElements.forEach((el, i) => {
+            if (times[i]) el.textContent = times[i];
+          });
+        }, 100);
+      });
+
+      // Add window resize handler for chart responsiveness
+      window.addEventListener('resize', () => {
+        if (revenueChart) revenueChart.resize();
+        if (performanceChart) performanceChart.resize();
+      });
+
+      // Add some interactive hover effects
+      document.addEventListener('mousemove', (e) => {
+        const cards = document.querySelectorAll('.stat-card, .chart-card');
+        
+        cards.forEach(card => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+          } else {
+            card.style.transform = '';
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
